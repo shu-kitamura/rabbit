@@ -35,7 +35,9 @@ impl Renderer {
                 let mut buffer = [0u8; 4];
                 out.write_all(ch.encode_utf8(&mut buffer).as_bytes())?;
             }
-            out.write_all(b"\n")?;
+            if y + 1 < height {
+                out.write_all(b"\n")?;
+            }
         }
         out.flush()?;
 

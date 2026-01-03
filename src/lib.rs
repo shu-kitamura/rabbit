@@ -1,5 +1,6 @@
 pub mod actor;
 pub mod app;
+pub mod ascii;
 pub mod error;
 pub mod frame;
 pub mod rabbit;

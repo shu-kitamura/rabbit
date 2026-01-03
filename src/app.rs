@@ -19,8 +19,8 @@ impl Default for AppConfig {
     fn default() -> Self {
         Self {
             fps: 30,
-            width: 40,
-            height: 10,
+            width: 80,
+            height: 24,
             animal: AnimalKind::Rabbit,
         }
     }
@@ -45,7 +45,7 @@ impl App {
 
         let actor: Box<dyn Actor> = match config.animal {
             AnimalKind::Rabbit => {
-                let sprite = default_rabbit_sprite()?;
+                let sprite = default_rabbit_sprite((config.width, config.height))?;
                 Box::new(Rabbit::new((0, 0), (1, 0), sprite))
             }
         };
@@ -79,18 +79,17 @@ impl App {
     }
 }
 
-fn default_rabbit_sprite() -> Result<Sprite> {
-    let frames = vec![
-        vec![
-            " (\\_/)".to_string(),
-            "(='.'=)".to_string(),
-            "(\")_(\")".to_string(),
-        ],
-        vec![
-            " (\\_/)".to_string(),
-            "(='o'=)".to_string(),
-            "(\")_(\")".to_string(),
-        ],
-    ];
-    Ok(Sprite::new(frames)?)
+fn default_rabbit_sprite(frame_size: (u16, u16)) -> Result<Sprite> {
+    let raw_lines = crate::ascii::parse_ascii_art(include_str!("../rabbit.txt"));
+    let (raw_w, raw_h) = crate::ascii::dimensions(&raw_lines);
+
+    let frame_w = usize::from(frame_size.0);
+    let frame_h = usize::from(frame_size.1);
+
+    let max_w = (frame_w * 7 / 8).max(1);
+    let max_h = (frame_h * 7 / 8).max(1);
+    let (out_w, out_h) = crate::ascii::fit_dimensions((raw_w, raw_h), (max_w, max_h));
+
+    let frame = crate::ascii::downsample(&raw_lines, out_w, out_h);
+    Ok(Sprite::new(vec![frame])?)
 }
